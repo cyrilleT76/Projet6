@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # coding: utf-8
 
 import sys, time, os, datetime, cmd
@@ -21,7 +21,7 @@ today=day+"-"+month+"-"+year+"-"+hour+minute
 
 ###start FOR ...in 
 routeur = open('Devices/switch_cisco')
-scp_folder = 'PROJET/P6/Sauvegarde/routeur'
+scp_folder = 'PROJET/P6/Sauvegarde/switch'
 
 for device in routeur.readlines():
 	infos = device.split('_')
@@ -48,11 +48,11 @@ for device in routeur.readlines():
 		'secret': mdp_secret,     # optional, defaults to ''
 	}
 
-	print ('\n #### Connecting to the device ' + adress_ip + ' #### \n')
+	print ('\n#### Connecting to the device ' + adress_ip + ' #### \n')
 	try:
 		net_connect = ConnectHandler(**devices)
 	except NetMikoTimeoutException:
-		print ('Device not reachable.')
+		print ('Device {} is not reachable.'.format(hostname))
 		continue
 	except AuthenticationException:
 		print ('Authentication Failure.')
@@ -65,9 +65,9 @@ for device in routeur.readlines():
 	net_connect = ConnectHandler(**devices)
 	net_connect.enable()
 
-	filename = str(adress_ip)+'-' + today
+	filename = hostname +'_' + str(adress_ip)+'-' + today
 	save_config = 'copy startup-config scp://admin01:tssr@'+scp_server+'/'+scp_folder+'/'+filename
-	print (save_config)
+	print (hostname + "\033[31m saving in progress...\033[0m" + '\n')
 
 	output = net_connect.send_command_timing(
 		command_string=save_config,
@@ -76,34 +76,30 @@ for device in routeur.readlines():
 	)
 	
 	if "Address or name of remote host" in output:
-		print (net_connect.find_prompt())
-		output += net_connect.send_command_timing(
+			output += net_connect.send_command_timing(
 			command_string="\n",
 			strip_prompt=False,
 			strip_command=False
 			)
 		
 	if "Destination username" in output:
-		print (net_connect.find_prompt())
-		output += net_connect.send_command_timing(
+			output += net_connect.send_command_timing(
 			command_string="\n",
 			strip_prompt=False,
 			strip_command=False
 		)
 	time.sleep(10)		
 	if "Destination filename" in output:
-		print (net_connect.find_prompt())
-		output += net_connect.send_command_timing(
+			output += net_connect.send_command_timing(
 			command_string="\n",
 			strip_prompt=False,
 			strip_command=False
 		)
 	time.sleep(30)	
-	print('####')
-	print (output)
+	
 	net_connect.disconnect()
-	print ('Déconnexion ok')
+	print ('### Disconnecting to the device ' + adress_ip + ' is OK #### \n')
 				
-print('fin')
+print('Fin du script')
 
 	
