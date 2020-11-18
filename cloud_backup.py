@@ -42,7 +42,9 @@ for fichiers in os.listdir(chemin_sauvegarde):
 		 print(f"\033[34mFichiers Sauvegardés à J-10 : {fichiers}\033[0m " )
 		 print("\t\033[32mDate de création: %s \033[0m" % creation_date)
 		 print("\t\033[32mDate expiration: %s \033[0m" % expected_date)
-		 #s3.upload_file(upload_fichiers, upload_file_bucket, upload_file_key)
+		 #s3.upload_fileupload_fichiers, upload_file_bucket, upload_file_key)
+	elif creation_date < expected_date:
+		 s3.delete_object(Bucket=upload_file_bucket+'/routeur/',Key=fichiers)
 	else :
 		print(f"\033[31mFichiers non Sauvegardés : {fichiers}\033[0m")
 		

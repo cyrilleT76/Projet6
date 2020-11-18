@@ -23,18 +23,29 @@ year=time.strftime('%Y')
 today=day+"-"+month+"-"+year+"-"+hour+minute
 
 affichage_menu ="""
-#############################
+\033[34m#############################
 #                           #
-#     MENU DE SAUVEGARDE    #
+#\033[0m     MENU DE SAUVEGARDE\033[34m    #
 #                           #
-#############################
+#############################\033[0m 
+Choissisez une option 
+\t\033[31m 1\033[0m - Switch
+\t\033[31m 2\033[0m - Routeur
+\t\033[31m 3\033[0m - Envoi dans le Cloud
+\t\033[31m 4\033[0m - Quitter
+"""
+
+affiche_cloud = """
+\033[34m#############################
+#                           #
+#\033[0m       ENVOI CLOUD S3\033[34m      # 
+#                           #
+#############################\033[0m 
 Choissisez une option 
 \t1 - Switch
 \t2 - Routeur
-\t3 - Envoi dans le Cloud
-\t4 - Quitter
+\t3 - Retour
 """
-
 def lecture_devices(device_type):
 	device_type_init = device_type 							# recupération du type de matériel switch ou routeur
 	chemin_listes = (f'Devices/{device_type_init}_cisco')	# chemin du fichier de parametres
@@ -94,7 +105,6 @@ def sauvegarde_devices(user_choice, device_type):
 		except SSHException:
 			print ('Make sure SSH is enabled in device.')
 		
-			
 		### initialisation de la connexion
 		print ('Initiating configuration backup to ' + hostname + '\n')
 		net_connect.enable()
@@ -187,7 +197,7 @@ def sauvegarde_devices(user_choice, device_type):
 
 option = "0"
 while option != "4":
-	
+	os.system("clear")
 	option = input(affichage_menu)
 
 	if option == "1" :
@@ -201,4 +211,14 @@ while option != "4":
 		sauvegarde_devices(user_choice,device_type)
 
 	elif option == "3":
-		print ("Bienvenue dans le Cloud AWS3")
+		
+		option_cloud = "0"
+		
+		while option_cloud != "3" :
+			os.system("clear")
+			option_cloud = input(affiche_cloud)
+			if option_cloud == "1" :
+				device_type = 'switch'
+				print(device_type)
+				time.sleep(10)
+
