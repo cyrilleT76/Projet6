@@ -93,6 +93,7 @@ def sauvegarde_devices(user_choice, device_type):
 			print ('Authentication Failure.')
 		except SSHException:
 			print ('Make sure SSH is enabled in device.')
+		
 			
 		### initialisation de la connexion
 		print ('Initiating configuration backup to ' + hostname + '\n')
@@ -148,7 +149,7 @@ def sauvegarde_devices(user_choice, device_type):
 				net_connect = ConnectHandler(**devices)
 			except NetMikoTimeoutException:
 				print ('Device {} is not reachable.'.format(hostname))
-				break
+				continue
 			except AuthenticationException:
 				print ('Authentication Failure.')
 				continue
