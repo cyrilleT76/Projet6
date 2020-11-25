@@ -1,0 +1,3 @@
+scp_server: 192.168.122.36
+delai_expiration: 10
+nom_bucket: save-config-p6

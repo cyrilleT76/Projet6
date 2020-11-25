@@ -2,20 +2,38 @@
 # coding: utf-8
 
 import sys, time, os, cmd, string
+import linecache
+import boto3
+import yaml
+
 from datetime import datetime, timedelta
 from netmiko import ConnectHandler
 from getpass import getpass
 from netmiko.ssh_exception import NetMikoTimeoutException
 from netmiko.ssh_exception import AuthenticationException
-import linecache
-import boto3
 
-# on effece l'ecran
+
+with open("config.yaml", "r") as configfile:
+	cfg = yaml.load(configfile)
+
+# on efface l'ecran
 os.system("clear")
 
-### initialisation des paramétres date du jour et ip du serveur de sauvegarde
-now = datetime.now()
-scp_server = '192.168.122.36'
+### initialisation des paramétres 
+scp_server = cfg["scp_server"]
+delai_expiration = cfg["delai_expiration"]
+
+# date du jour
+tday = time.time()
+duration = 86400 * int(delai_expiration) # nombre de  jours
+
+# contrôle pour la suppression
+expire_limit = tday - duration
+
+# initialise s3 client
+s3_client = boto3.client('s3')
+my_bucket = cfg["nom_bucket"]
+file_size = [] # juste pour suivre les économies totales en termes de taille de stockage
 
 # Initialisation format date
 hour=time.strftime('%H')
@@ -78,7 +96,7 @@ def lecture_devices(device_type):
 			choix_type_sauvegarde = int(input(f"\nEntrez votre choix de [\033[31m1-{compteur}\033[0m] ou [\033[31m0\033[0m] pour Tous : "))
 			continue
 		except ValueError:
-			print("Oops! Ce n'est pas un nombre valide. Esaaye encore...")
+			print("Oops! Ce n'est pas un nombre valide. Essaye encore...")
 
 	device_lecture.close()			# on ferme le fichier
 	return choix_type_sauvegarde 	# on retourne le choix de l'utilisateur
@@ -194,6 +212,7 @@ def sauvegarde_devices(user_choice, device_type):
 			
 			### initialisation de la connexion
 			print ('Initiating configuration backup to ' + hostname + '\n')
+			time.sleep(5)
 			net_connect.enable()
 
 			### creation de la commande pour la sauvagarde
@@ -209,6 +228,7 @@ def sauvegarde_devices(user_choice, device_type):
 					output += net_connect.send_command_timing(command_string="\n", strip_prompt=False, strip_command=False)
 			if "Destination filename" in output:
 					output += net_connect.send_command_timing(command_string="\n", strip_prompt=False, strip_command=False)
+			time.sleep(20)
 
 			### Déconnexion
 			print ('### Disconnecting to the device ' + adress_ip + ' is OK #### \n')
@@ -232,7 +252,6 @@ def get_creation_date(file):
 	try:
 		return stat.st_birthtime
 	except AttributeError:
-		# Nous sommes probablement sous Linux. Pas de moyen pour obtenir la date de création, que la dernière date de modification.
 		return stat.st_mtime
 
 def sauvegarde_cloud_S3 (device_type_cloud):
@@ -248,7 +267,7 @@ def sauvegarde_cloud_S3 (device_type_cloud):
 
 	for fichiers in os.listdir(chemin_sauvegarde):
 		
-		upload_file_bucket = 'save-config-p6'
+		upload_file_bucket = my_bucket
 		upload_file_key = f'{device_type_cloud}/{fichiers}'
 		upload_fichiers = f'{chemin_sauvegarde}/{fichiers}'
 		
@@ -257,27 +276,17 @@ def sauvegarde_cloud_S3 (device_type_cloud):
 		if creation_date > expected_date:
 			print(f"\033[34mFichiers Sauvegardés à J-10 : {fichiers}\033[0m " )
 			print("\t\033[32mDate de création: %s \033[0m" % creation_date)
-			print("\t\033[32mDate expiration: %s \033[0m" % expected_date)
+			print("\t\033[32mDate d'expiration: %s \033[0m" % (creation_date + timedelta(days=10)))
 			s3.upload_file(upload_fichiers, upload_file_bucket, upload_file_key)
 		#elif creation_date < expected_date:
 			#s3.delete_object(Bucket=upload_file_bucket+'/'+ device_type_cloud +'/',Key=fichiers)
 		else :
 			print(f"\033[31mFichiers non Sauvegardés : {fichiers}\033[0m")
 			print(f"\t\033[31mDate de création: {creation_date}")
-			print(f"\t\033[31mDate de création: {expected_date}")
+			print(f"\t\033[31mA expiré le : {(creation_date + timedelta(days=10))}")
 
 ##########################################################################################################################
 ### SUPPRESSION SUR S3 FICHIERS > DATE JOUR -10 ex: nous sommes le 13/12, les fichiers avant le 3/12 seront supprimés
-
-# date du jour
-_tday = time.time()
-duration = 8640*2 #10 jours
-#checkpoint for deletion
-_expire_limit = _tday-duration
-# initialize s3 client
-s3_client = boto3.client('s3')
-my_bucket = "save-config-p6"
-_file_size = [] #just to keep track of the total savings in storage size
 
 # Fonctions
 def get_key_info(bucket, prefix):
@@ -291,7 +300,7 @@ def get_key_info(bucket, prefix):
 	while True:
 		response = s3_client.list_objects_v2(**kwargs)
 		for obj in response["Contents"]:
-			# exclude directories/folder from results. Remove this if folders are to be removed too
+			# exclure les annuaires/dossiers des résultats. Supprimer cette option si les dossiers doivent également être supprimés
 			if "." in obj["Key"]:
 				key_names.append(obj["Key"])
 				file_timestamp.append(obj["LastModified"].timestamp())
@@ -310,22 +319,22 @@ def get_key_info(bucket, prefix):
 	return key_info
 
 
-# Check if date passed is older than date limit
-def _check_expiration(key_date=_tday, limit=_expire_limit):
+# Vérifiez si la date dépassée est antérieure à la date limite
+def check_expiration(key_date=tday, limit=expire_limit):
 	if key_date < limit:
 		return True
 
-# connect to s3 and delete the file
+# se connecter à s3 et supprimer le fichier
 def delete_s3_file(file_path, bucket=my_bucket):
 	print(f"Suppression de {file_path}")
 	s3_client.delete_object(Bucket=bucket, Key=file_path)
 	return True
 
-# check size deleted
-def _total_size_dltd(size):
-	_file_size.append(size)
-	_del_size = round(sum(_file_size)/1.049e+6, 2) #convert from bytes to mebibytes
-	return _del_size
+# verification taille effacée
+def total_size_dltd(size):
+	file_size.append(size)
+	del_size = round(sum(file_size)/1.049e+6, 2) # conversion byte en megabyte
+	return del_size
 		
 #############################################################################################
 ### Menu Option
@@ -334,7 +343,7 @@ option = "0"
 while option != "4":
 	os.system("clear")
 	option = input(affichage_menu)
-
+	
 	if option == "1" :
 		device_type = 'switch'
 		user_choice = lecture_devices(device_type)
@@ -355,50 +364,48 @@ while option != "4":
 			option_cloud = input(affiche_cloud)
 			
 			if option_cloud == "1" :
+				
 				device_type_cloud = 'switch'
-				my_ftp_key = f"{device_type_cloud}/"
-
 				sauvegarde_cloud_S3(device_type_cloud)
-
+				
 				try:
 					s3_file = get_key_info(my_bucket,device_type_cloud)
-					_del_size  = 0
+					del_size  = 0
 					for i, fs in enumerate(s3_file["timestamp"]):
-						file_expired = _check_expiration(fs)
+						file_expired = check_expiration(fs)
 						if file_expired: #if True is recieved
 							file_deleted = delete_s3_file(s3_file["key_path"][i])
 							if file_deleted: #if file is deleted
-								_del_size = _total_size_dltd(s3_file["size"][i])
+								del_size = total_size_dltd(s3_file["size"][i])
 
-					print(f"Taille totale du/des fichier(s) supprimé(s) :{_del_size} MB")
+					print(f"Taille totale du/des fichier(s) supprimé(s) :{del_size} MB")
 				except:
 					print ("échec:", sys.exc_info()[1])
-					print(f"Taille totale du/des fichier(s) supprimé(s) : {_del_size} MB")
+					print(f"Taille totale du/des fichier(s) supprimé(s) : {del_size} MB")
 
 				input("Tapez sur ENTREE pour contunuer.....")
 
 			elif option_cloud == "2" :
 				device_type_cloud = 'routeur'
-				my_ftp_key = f"{device_type_cloud}/"
-
+				
 				# appelle de la fonction pour sauvegarder dans le cloud
 				sauvegarde_cloud_S3(device_type_cloud)
 
 				# suppresssion des fichiers supérieurs à 10 jours dans le cloud
 				try:
 					s3_file = get_key_info(my_bucket,device_type_cloud)
-					_del_size  = 0
+					del_size  = 0
 					for i, fs in enumerate(s3_file["timestamp"]):
-						file_expired = _check_expiration(fs)
+						file_expired = check_expiration(fs)
 						if file_expired: #if True is recieved
 							file_deleted = delete_s3_file(s3_file["key_path"][i])
 							if file_deleted: #if file is deleted
-								_del_size = _total_size_dltd(s3_file["size"][i])
+								del_size = total_size_dltd(s3_file["size"][i])
 
-					print(f"Taille totale du/des fichier(s) supprimé(s) :{_del_size} MB")
+					print(f"Taille totale du/des fichier(s) supprimé(s) :{del_size} MB")
 				except:
 					print ("échec:", sys.exc_info()[1])
-					print(f"Taille totale du/des fichier(s) supprimé(s) : {_del_size} MB")
+					print(f"Taille totale du/des fichier(s) supprimé(s) : {del_size} MB")
 				
 				input("Tapez sur ENTREE pour contunuer.....")
 			
