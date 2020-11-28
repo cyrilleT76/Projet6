@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # coding: utf-8
 
-import sys, time, os, cmd, string
-import linecache
+import sys, time, os, cmd, string, linecache
+
 import boto3
 import yaml
 
@@ -22,6 +22,7 @@ os.system("clear")
 ### initialisation des paramétres 
 scp_server = cfg["scp_server"]
 delai_expiration = cfg["delai_expiration"]
+my_bucket = cfg["nom_bucket"]
 
 # date du jour
 tday = time.time()
@@ -32,7 +33,6 @@ expire_limit = tday - duration
 
 # initialise s3 client
 s3_client = boto3.client('s3')
-my_bucket = cfg["nom_bucket"]
 file_size = [] # juste pour suivre les économies totales en termes de taille de stockage
 
 # Initialisation format date
@@ -106,7 +106,7 @@ def sauvegarde_devices(user_choice, device_type):
 	device_type_init = device_type 										# recupération du type de matériel switch ou routeur						
 	chemin_listes = (f'Devices/{device_type_init}_cisco')				# chemin du fichier de parametres
 	device_lecture = open(chemin_listes)								# lecture du fichier
-	ligne_choice = user_choice											# récupéaration du choix de l'utilsiateur 	
+	ligne_choice = user_choice											# récupération du choix de l'utilsiateur 	
 	scp_folder = (f'PROJET/P6/Sauvegarde/{device_type_init}')			# chemin du répertoire de sauvegarde
 	
 	# tests si choix est valide
@@ -236,16 +236,13 @@ def sauvegarde_devices(user_choice, device_type):
 		input("Tapez sur ENTREE pour continuer.....")
 		
 	else :
-		print ("Erreur de saisie")
+		print ("Erreur de saisie....")
 	
 	### fermeture du fichier de settings
 	device_lecture.close()
 
 ##########################################################################################################################
 ### SAUVEGARDE S3  
-
-# Initialisation pour AWS3
-s3 = boto3.client('s3')
 
 def get_creation_date(file):
 	stat = os.stat(file)
@@ -254,7 +251,7 @@ def get_creation_date(file):
 	except AttributeError:
 		return stat.st_mtime
 
-def sauvegarde_cloud_S3 (device_type_cloud):
+def sauvegarde_cloud_S3 (device_type_cloud,delai_expiration):
 	# Initialisation pour AWS3
 	s3 = boto3.client('s3')
 	chemin_sauvegarde = f'./Sauvegarde/{device_type_cloud}'
@@ -263,7 +260,7 @@ def sauvegarde_cloud_S3 (device_type_cloud):
 	today = datetime.today()
 
 	# date du jour moins 10 jours
-	expected_date = today - timedelta(days=10)
+	expected_date = today - timedelta(days=delai_expiration)
 
 	for fichiers in os.listdir(chemin_sauvegarde):
 		
@@ -276,19 +273,17 @@ def sauvegarde_cloud_S3 (device_type_cloud):
 		if creation_date > expected_date:
 			print(f"\033[34mFichiers Sauvegardés à J-10 : {fichiers}\033[0m " )
 			print("\t\033[32mDate de création: %s \033[0m" % creation_date)
-			print("\t\033[32mDate d'expiration: %s \033[0m" % (creation_date + timedelta(days=10)))
+			print("\t\033[32mDate d'expiration: %s \033[0m" % (creation_date + timedelta(days=delai_expiration)))
 			s3.upload_file(upload_fichiers, upload_file_bucket, upload_file_key)
-		#elif creation_date < expected_date:
-			#s3.delete_object(Bucket=upload_file_bucket+'/'+ device_type_cloud +'/',Key=fichiers)
 		else :
 			print(f"\033[31mFichiers non Sauvegardés : {fichiers}\033[0m")
 			print(f"\t\033[31mDate de création: {creation_date}")
-			print(f"\t\033[31mA expiré le : {(creation_date + timedelta(days=10))}")
+			print(f"\t\033[31mA expiré le : {(creation_date + timedelta(days=delai_expiration))}")
 
 ##########################################################################################################################
-### SUPPRESSION SUR S3 FICHIERS > DATE JOUR -10 ex: nous sommes le 13/12, les fichiers avant le 3/12 seront supprimés
+### SUPPRESSION SUR S3 FICHIERS > DATE JOUR - "delai_expiration" ex: nous sommes le 13/12, les fichiers avant le 3/12 seront supprimés
 
-# Fonctions
+# Fonctions lister les infos du bucket
 def get_key_info(bucket, prefix):
 
 	print(f"Voici le nom, la taille et la date des fichiers dans le Bucket S3: {bucket} dans le répertoire: {prefix}")
@@ -366,7 +361,7 @@ while option != "4":
 			if option_cloud == "1" :
 				
 				device_type_cloud = 'switch'
-				sauvegarde_cloud_S3(device_type_cloud)
+				sauvegarde_cloud_S3(device_type_cloud,delai_expiration)
 				
 				try:
 					s3_file = get_key_info(my_bucket,device_type_cloud)
@@ -389,9 +384,9 @@ while option != "4":
 				device_type_cloud = 'routeur'
 				
 				# appelle de la fonction pour sauvegarder dans le cloud
-				sauvegarde_cloud_S3(device_type_cloud)
+				sauvegarde_cloud_S3(device_type_cloud,delai_expiration)
 
-				# suppresssion des fichiers supérieurs à 10 jours dans le cloud
+				# suppresssion des fichiers supérieurs à la variable "delai_expiration" jours dans le cloud
 				try:
 					s3_file = get_key_info(my_bucket,device_type_cloud)
 					del_size  = 0
