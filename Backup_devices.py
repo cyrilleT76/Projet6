@@ -12,21 +12,21 @@ from getpass import getpass
 from netmiko.ssh_exception import NetMikoTimeoutException
 from netmiko.ssh_exception import AuthenticationException
 
-
+# Ouverture du fichier de configuration
 with open("config.yaml", "r") as configfile:
 	cfg = yaml.load(configfile)
 
 # on efface l'ecran
 os.system("clear")
 
-### initialisation des paramétres 
+### initialisation des paramétres avec le fichier de configuration
 scp_server = cfg["scp_server"]
 delai_expiration = cfg["delai_expiration"]
 my_bucket = cfg["nom_bucket"]
 
 # date du jour
 tday = time.time()
-duration = 86400 * int(delai_expiration) # nombre de  jours
+duration = 86400 * int(delai_expiration) # nombre de jours * par le délai_expiration
 
 # contrôle pour la suppression
 expire_limit = tday - duration
@@ -49,7 +49,7 @@ affichage_menu ="""
 #                           #
 #\033[0m     MENU DE SAUVEGARDE\033[34m    #
 #                           #
-#############################\033[0m 
+#############################\n\033[0m 
 Choissisez une option 
 \t\033[31m 1\033[0m - Switch
 \t\033[31m 2\033[0m - Routeur
@@ -62,7 +62,7 @@ affiche_cloud = """
 #                           #
 #\033[0m       ENVOI CLOUD S3\033[34m      # 
 #                           #
-#############################\033[0m 
+#############################\n\033[0m 
 Choissisez une option 
 \t\033[31m1\033[0m  - Switch
 \t\033[31m2\033[0m  - Routeur
@@ -131,30 +131,32 @@ def sauvegarde_devices(user_choice, device_type):
 			'secret': mdp_secret,    
 		}
 	
-		print ('\n#### Connecting to the device ' + adress_ip + ' #### \n')
+		print (f"\n#### Connexion à l'appareil {adress_ip} #### \n")
 
 		### test de la connexion SSH
 		try:
 			net_connect = ConnectHandler(**devices)
 		except NetMikoTimeoutException:
-			print ('Device {} is not reachable.'.format(hostname))
+			print (f"L'appareil {hostname} n'est pas joignable")
 			exit()
 		except AuthenticationException:
-			print ('Authentication Failure.')
+			print (f"Échec de l'authentification.")
 			exit()
 		except SSHException:
-			print ('Make sure SSH is enabled in device.')
+			print (f"Assurez-vous que la fonction SSH est activée dans l'appareil.")
 			exit()
-		
+			
 		### initialisation de la connexion
-		print ('Initiating configuration backup to ' + hostname + '\n')
+		print (f"Lancement de la sauvegarde de la configuration vers {hostname}\n")
+		
 		time.sleep(5)
 		net_connect.enable()
 
 		### creation de la commande pour la sauvagarde
 		filename = hostname +'_' + str(adress_ip)+'-' + today
 		save_config = 'copy startup-config scp://'+user_linux+':'+mdp_linux+'@'+scp_server+'/'+scp_folder+'/'+filename
-		print (hostname + "\033[31m saving in progress...\033[0m" + '\n')
+		
+		print (hostname + "\033[31m sauvegarde en cours...\033[0m" + '\n')
 		
 		#### envoie de la commande et validation des messages dans la console CLI cisco
 		output = net_connect.send_command_timing(command_string=save_config,strip_prompt=False,strip_command=False)
@@ -169,7 +171,7 @@ def sauvegarde_devices(user_choice, device_type):
 
 		### Déconnexion
 		net_connect.disconnect()
-		print ('### Disconnecting to the device ' + adress_ip + ' is OK #### \n')
+		print (f"#### Déconnexion de l'appareil {adress_ip} OK #### \n")
 
 		### fermeture du fichier de settings
 		device_lecture.close()
@@ -195,30 +197,32 @@ def sauvegarde_devices(user_choice, device_type):
 				'secret': mdp_secret,    
 			}
 
-			print ('\n#### Connecting to the device ' + adress_ip + ' #### \n')
+			print (f"\n#### Connexion à l'appareil {adress_ip} #### \n")
 
 			### test de la connexion SSH
 			try:
 				net_connect = ConnectHandler(**devices)
 			except NetMikoTimeoutException:
-				print ('Device {} is not reachable.'.format(hostname))
-				continue
+				print (f"L'appareil {hostname} n'est pas joignable")
+				exit()
 			except AuthenticationException:
-				print ('Authentication Failure.')
-				continue
+				print (f"Échec de l'authentification.")
+				exit()
 			except SSHException:
-				print ('Make sure SSH is enabled in device.')
-				continue
+				print (f"Assurez-vous que la fonction SSH est activée dans l'appareil.")
+				exit()
 			
 			### initialisation de la connexion
-			print ('Initiating configuration backup to ' + hostname + '\n')
+			print (f"Lancement de la sauvegarde de la configuration vers {hostname}\n")
+			
 			time.sleep(5)
 			net_connect.enable()
 
 			### creation de la commande pour la sauvagarde
 			filename = hostname +'_' + str(adress_ip)+'-' + today
 			save_config = 'copy startup-config scp://'+user_linux+':'+mdp_linux+'@'+scp_server+'/'+scp_folder+'/'+filename
-			print (hostname + "\033[31m saving in progress...\033[0m" + '\n')
+			
+			print (hostname + "\033[31m sauvegarde en cours...\033[0m" + '\n')
 			
 			#### envoie de la commande et validation des messages dans la console CLI cisco
 			output = net_connect.send_command_timing(command_string=save_config,strip_prompt=False,strip_command=False)
@@ -231,7 +235,8 @@ def sauvegarde_devices(user_choice, device_type):
 			time.sleep(20)
 
 			### Déconnexion
-			print ('### Disconnecting to the device ' + adress_ip + ' is OK #### \n')
+			print (f"#### Déconnexion de l'appareil {adress_ip} OK #### \n")
+
 		net_connect.disconnect()
 		input("Tapez sur ENTREE pour continuer.....")
 		
@@ -332,8 +337,7 @@ def total_size_dltd(size):
 	return del_size
 		
 #############################################################################################
-### Menu Option
-
+### Menu SAUVEGARDE
 option = "0"
 while option != "4":
 	os.system("clear")
@@ -350,19 +354,20 @@ while option != "4":
 		sauvegarde_devices(user_choice,device_type)
 
 	elif option == "3":
-		
+	### Menu CLOUD		
 		option_cloud = "0"
-		
 		while option_cloud != "3" :
 
 			os.system("clear")
 			option_cloud = input(affiche_cloud)
 			
 			if option_cloud == "1" :
-				
+				# appelle de la fonction pour sauvegarder dans le cloud
 				device_type_cloud = 'switch'
 				sauvegarde_cloud_S3(device_type_cloud,delai_expiration)
-				
+				print('\n')
+
+				# suppresssion des fichiers supérieurs à la variable "delai_expiration" jours dans le cloud
 				try:
 					s3_file = get_key_info(my_bucket,device_type_cloud)
 					del_size  = 0
@@ -381,10 +386,10 @@ while option != "4":
 				input("Tapez sur ENTREE pour contunuer.....")
 
 			elif option_cloud == "2" :
-				device_type_cloud = 'routeur'
-				
 				# appelle de la fonction pour sauvegarder dans le cloud
+				device_type_cloud = 'routeur'
 				sauvegarde_cloud_S3(device_type_cloud,delai_expiration)
+				print('\n')
 
 				# suppresssion des fichiers supérieurs à la variable "delai_expiration" jours dans le cloud
 				try:
@@ -399,9 +404,15 @@ while option != "4":
 
 					print(f"Taille totale du/des fichier(s) supprimé(s) :{del_size} MB")
 				except:
-					print ("échec:", sys.exc_info()[1])
+					print ("Echec:", sys.exc_info()[1])
 					print(f"Taille totale du/des fichier(s) supprimé(s) : {del_size} MB")
 				
 				input("Tapez sur ENTREE pour contunuer.....")
+	elif option == "4":
+		os.system("clear")
+		print (f"\033[34m\nMerci d'avoir uitliser ce programme\033[0m")
+		print (f"\033[34mA bientôt !\033[0m\n")
+
+		
 			
 	
