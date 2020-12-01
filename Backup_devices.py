@@ -56,6 +56,7 @@ Choissisez une option
 \t\033[31m 3\033[0m - Envoi dans le Cloud
 \t\033[31m 4\033[0m - Quitter
 """
+
 # initialisation de l'affichage du menu cloud
 affiche_cloud = """
 \033[34m#############################
@@ -83,8 +84,8 @@ def lecture_devices(device_type):
 	
 	for device in device_lecture.readlines():
 		infos = device.split('_')
-		hostname = infos[0] 		#récupération de l'adress IP
-		adress_ip = infos[1]		#récupération du login SSH
+		hostname = infos[0] 		# récupération du nom
+		adress_ip = infos[1]		# récupération de l'adress IP
 		compteur += 1				# on incrément le compteur à chaue itération
 		
 		### affichage de infos pour chaque matériel
