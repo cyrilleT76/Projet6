@@ -18,9 +18,10 @@ Compte et mot de passe SSH sur matériels cisco, et mot de passe ENABLE d'activ�
 
 ## Configuration/Paramètres :
 Utilisation du fichier *[config.yaml](https://github.com/cyrilleT76/Projet6/blob/master/config.yaml)* pour saisir vos parametres de sauvegarde  
->scp_server: *192.168.122.36*  
->delai_expiration: *10*  
->nom_bucket: *save-config-p6*  
+
+    scp_server: 192.168.122.36  
+    delai_expiration: 10 
+    nom_bucket: save-config-p6 
 
 
 Utilisation du dossier *Devices* avec les 2 fichiers *routeur_cisco* et *switch_cisco* pour les informations (adresse ip, mot de passe etc...) des routeus et des switchs    
@@ -30,18 +31,19 @@ Création d'un répertoire *Sauvegarde* avec deux sous répertoires *switch* et 
 
 ## Fonctionnement :
 Sous linux, exécuter le fichier *[Backup_devices.py](https://github.com/cyrilleT76/Projet6/blob/master/config.yaml)*   
->$./Backup_devices.py   
+
+    $./Backup_devices.py   
 
 pour afficher le menu suivant   
 
 * **Menu SAUVEGARDE:**     
     1.Switch -> en tapant 1 cela affiche la listes des switchs, on peux en sélectionner un seul ou tous    
 
-        le fichier genere est formater ainsi : *nom + adresse + date*  
+        le fichier genere est formaté ainsi : nom + adresse + date  
 
     2.Routeur -> en tapant 2 cela affiche la listes des switchs,on peux sélectionne un seul ou tous    
 
-        **le fichier genere est formater ainsi : nom + adresse + date**
+        le fichier genere est formaté ainsi : nom + adresse + date
 
     3.Envoi cloud -> ouvre le menu cloud ci dessous  
 
