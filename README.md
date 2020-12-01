@@ -34,22 +34,24 @@ Sous linux, exécuter le fichier *[Backup_devices.py](https://github.com/cyrille
 
 pour afficher le menu suivant   
 
-* <u>Menu SAUVEGARDE</u>:   
+* Menu SAUVEGARDE:   
     1. switch -> en tapant 1 cela affiche la listes des switchs, on peux en sélectionner un seul ou tous    
->le fichier genere est formater ainsi : ***nom + adresse + date***  
+
+        >le fichier genere est formater ainsi : ***nom + adresse + date***  
 
     2. routeur -> en tapant 2 cela affiche la listes des switchs,on peux sélectionne un seul ou tous    
-    >le fichier genere est formater ainsi : ***nom + adresse + date***  
-    
+
+        >le fichier genere est formater ainsi : ***nom + adresse + date***  
+
     3. envoi cloud -> ouvre le menu cloud ci dessous  
-    
+
     4. quitter -> pour quiter le scritp  
-    
-* <u>Menu CLOUD</u>:  
+
+* Menu CLOUD:  
     1. switch -> effectue une sauvegarde dans le cloud S3 de tous les fichiers inferieurs à la date d'expiration ex: ici 10 jours dans fichier config.yaml  
-    
+
     2. routeur - > effectue une sauvegarde dans le cloud S3 de tous les fichiers inferieurs à la date d'expiration ex: ici 10 jours dans fichier config.yaml     
-    
+
     3. quitter  
 
 ## Contact :
