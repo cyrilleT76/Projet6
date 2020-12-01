@@ -283,8 +283,8 @@ def sauvegarde_cloud_S3 (device_type_cloud,delai_expiration):
 			s3.upload_file(upload_fichiers, upload_file_bucket, upload_file_key)
 		else :
 			print(f"\033[31mFichiers non Sauvegardés : {fichiers}\033[0m")
-			print(f"\t\033[31mDate de création: {creation_date}")
-			print(f"\t\033[31mA expiré le : {(creation_date + timedelta(days=delai_expiration))}")
+			print(f"\t\033[31mDate de création: {creation_date}\033[0m")
+			print(f"\t\033[31mA expiré le : {(creation_date + timedelta(days=delai_expiration))}\033[0m")
 
 ##########################################################################################################################
 ### SUPPRESSION SUR S3 FICHIERS > DATE JOUR - "delai_expiration" ex: nous sommes le 13/12, les fichiers avant le 3/12 seront supprimés
@@ -411,7 +411,7 @@ while option != "4":
 				input("Tapez sur ENTREE pour contunuer.....")
 	elif option == "4":
 		os.system("clear")
-		print (f"\033[34m\nMerci d'avoir uitliser ce programme\033[0m")
+		print (f"\033[34m\nMerci d'avoir utiliser ce programme\033[0m")
 		print (f"\033[34mA bientôt !\033[0m\n")
 
 		

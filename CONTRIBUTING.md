@@ -1,4 +1,4 @@
-# Contribuer
+# Contribution
 
 Lorsque vous contribuez à ce dépôt, veuillez d'abord discuter du changement que vous souhaitez apporter par le biais d'un numéro,
 e-mail, ou toute autre méthode avec les propriétaires de ce dépôt avant d'effectuer un changement. 
