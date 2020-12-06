@@ -11,10 +11,7 @@ Veuillez noter que nous avons un code de conduite, veuillez le suivre dans toute
    construire.
 2. Mettez à jour le fichier README.md avec les détails des changements apportés à l'interface, notamment le nouvel environnement 
    les variables, les ports exposés, les emplacements de fichiers utiles et les paramètres des conteneurs.
-3. Augmentez les numéros de version dans tous les fichiers d'exemple et le fichier README.md à la nouvelle version que ce
-   La demande de retrait représenterait. Le système de gestion des versions que nous utilisons est [SemVer] (http://semver.org/).
-4. Vous pouvez fusionner la demande d'extraction une fois que vous avez obtenu l'approbation de deux autres développeurs, ou si vous 
-   n'ont pas l'autorisation de le faire, vous pouvez demander au second examinateur de le fusionner pour vous.
+3. Augmentez les numéros de version dans tous les fichiers d'exemple et le fichier README.md à la nouvelle version.
 
 ## Code de conduite
 
@@ -82,13 +79,5 @@ De plus amples détails sur les politiques d'application spécifiques peuvent ê
 Les responsables de projets qui ne suivent pas ou n'appliquent pas le code de conduite en bonne et due forme
 la foi peut avoir des répercussions temporaires ou permanentes, selon ce qui est déterminé par d'autres
 les membres de la direction du projet.
-
-### Attribution
-
-Ce code de conduite est adapté de la [Convention des contributeurs] [page d'accueil], version 1.4,
-disponible sur [http://contributor-covenant.org/version/1/4] [version].
-
-[page d'accueil] : http://contributor-covenant.org
-[version] : http://contributor-covenant.org/version/1/4/
 
 
