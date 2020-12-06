@@ -11,9 +11,9 @@
 Linux, testé sous debian 10  
 Materiels cisco réels ou virtuels avec GNS3  
 Version python 3, testé sous 3.7   
-pip install *[requirements.txt](https://github.com/cyrilleT76/Projet6/blob/master/requirements.txt)*  
-Bucket sur AWS3 actif  
-Installation de [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2-linux.html#cliv2-linux-install)   
+pip install *[requirements.txt](https://github.com/cyrilleT76/Projet6/blob/master/requirements.txt)* pour les bibliothéques supplémentaires  
+Bucket actif sur AWS3     
+Installation de [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2-linux.html#cliv2-linux-install) pour la gestion du Bucket   
 Compte et mot de passe SSH sur matériels cisco, et mot de passe ENABLE d'activé  
 Compte et mot de passe Linux sur server SCP
 
