@@ -31,7 +31,7 @@ Utilisation du dossier *Devices* avec les 2 fichiers *routeur_cisco* et *switch_
 Création d'un répertoire *Sauvegarde* avec deux sous répertoires *switch* et *routeur* pour stocker les fichier de configuration de chaque matériels   
 
 ## Fonctionnement :
-Sous linux, exécuter le fichier *[Backup_devices.py](https://github.com/cyrilleT76/Projet6/blob/master/config.yaml)*   
+Sous linux, exécuter le fichier *[Backup_devices.py](https://github.com/cyrilleT76/Projet6/blob/master/Backup_device.py)*   
 
     $./Backup_devices.py   
 
