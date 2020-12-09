@@ -35,8 +35,9 @@ Sous linux, exécuter le fichier *[Backup_devices.py](https://github.com/cyrille
 
     $./Backup_devices.py   
 
-pour afficher le menu suivant   
-
+pour afficher le menu suivant      
+  
+![Texte alternatif](https://github.com/cyrilleT76/Projet6/blob/master/img/visu_SAUV.png)  
 * **Menu SAUVEGARDE:**     
     1.Switch -> en tapant 1 cela affiche la listes des switchs, on peux en sélectionner un seul via son N° ou tous en tapant 0    
 
@@ -48,8 +49,9 @@ pour afficher le menu suivant
 
     3.Envoi cloud -> ouvre le menu cloud ci dessous  
 
-    4.Quitter -> pour quiter le scritp  
-
+    4.Quitter -> pour quiter le script 
+      
+![Texte alternatif](https://github.com/cyrilleT76/Projet6/blob/master/img/visu_CLOUD.png)    
 * **Menu CLOUD:**     
     1.Switch -> effectue une sauvegarde dans le cloud S3 de tous les fichiers inferieurs à la date d'expiration 
     
