@@ -1,3 +1,7 @@
+![Python 3.7](https://img.shields.io/badge/python-3.7%2B-green)
+![Netmiko 3.0.0](https://img.shields.io/badge/netmiko-3.0.0-yellow)
+![cisco](https://img.shields.io/badge/cisco-ios-yellowgreen)
+
 # Sauvegarde automatisée de Routeur/Switch Cisco et envoi dans le Cloud S3
 >Le but de ce script est de sauvegarder la configuration de routeur ou de switch Cisco en local, en créant un fichier pour chaque matériels dans un répertoire donné, puis de les envoyer et les sauvegarder dans le cloud AWS3 avec une date d'expiration, afin de pas surcharger ce dernier.
 
